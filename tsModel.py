@@ -1,4 +1,4 @@
-
+# 人工データ作成関数
 import numpy as np
 
 def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=None, randomness=True):
