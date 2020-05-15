@@ -60,6 +60,14 @@ def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=No
     return ts[burn_in+margin:]
 
 def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1, N=1000, random_seed=0, burn_in=None, randomness=True):
+    """
+    randomnessについて、これはinnovation系列の従う分布を指定する。
+    正規分布："normal"もしくはTrue
+    一様分布："uniform"
+    移動ガンマ分布："gamma"
+    前半は正規分布で後半は一様分布："normal$uniform"
+    前半は正規分布で後半は移動ガンマ分布："normal&gamma"
+    """
     # 乱数の初期化
     np.random.seed(random_seed)
     
