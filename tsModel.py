@@ -22,26 +22,42 @@ def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=No
         ARIMA_flg=True
     
     # burn-in期間の設定
+    margin = max(p, q, d)
     if burn_in==None:
-        burn_in = 100*max(p, q, d)
+        burn_in = 100*margin
     
-    if randomness:
-        random = np.random.normal(loc=mu, scale=sigma, size=N+burn_in+max(p, q, d))
+    # 乱数epsilonの作成
+    if randomness=="normal" or randomness:
+        # 正規乱数
+        random = np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+    elif randomness=="uniform":
+        # 一様乱数
+        random=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N+burn_in+margin)
+    elif randomness=="gamma":
+        # 移動ガンマ乱数
+        # sigmaの値は最大でも4くらい。これ以上大きいと分散がずれる
+        random=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N+burn_in+margin)+mu-2/3
+    elif randomness=="normal&uniform":
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N//2)
+    elif randomness=="normal&gamma":
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
     else:
-        random = np.zeros(shape=(N+burn_in+max(p, q, d)))
+        random = np.zeros(shape=(N+burn_in+margin))
     
     # 初期値は0
     ts = np.zeros_like(random)
     
-    for i in range(max(p, q, d), N+burn_in+max(p, q, d)):
+    for i in range(margin, N+burn_in+margin):
         ts[i] = (a*np.flip(ts[i-p:i])).sum() + (b*np.flip(random[i-q:i])).sum() + random[i]
     
     if ARIMA_flg:
         for _ in range(d):
-            for i in range(max(p, q, d), N+burn_in+max(p, q, d)):
+            for i in range(margin, N+burn_in+margin):
                 ts[i] = ts[i] + ts[i-1]
             
-    return ts[burn_in+max(p, q, d):]
+    return ts[burn_in+margin:]
 
 def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1, N=1000, random_seed=0, burn_in=None, randomness=True):
     # 乱数の初期化
@@ -66,11 +82,25 @@ def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1
         burn_in = 100*margin
         
     # 乱数epsilonの作成
-    if randomness:
+    if randomness=="normal" or randomness:
+        # 正規乱数
         random = np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+    elif randomness=="uniform":
+        # 一様乱数
+        random=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N+burn_in+margin)
+    elif randomness=="gamma":
+        # 移動ガンマ乱数
+        # sigmaの値は最大でも4くらい。これ以上大きいと分散がずれる
+        random=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N+burn_in+margin)+mu-2/3
+    elif randomness=="normal&uniform":
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N//2)
+    elif randomness=="normal&gamma":
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
     else:
         random = np.zeros(shape=(N+burn_in+margin))
-        
+
     # そもそも季節成分あるのか?
     if m==0:
         return ARIMA(a=a, b=b, d=d, mu=mu, sigma=sigma, N=N, random_seed=random_seed, burn_in=burn_in, randomness=randomness)
