@@ -1,8 +1,11 @@
 # 人工データ作成関数
 # tsModel.pyとtimesries-WGAN/tsModel.pyは内容を共有しています。
 import numpy as np
+import torch.nn as nn
+import torch.nn.functional as F
+import torch
 
-def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=None, randomness=True):
+def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=None, randomness="normal"):
     # 乱数の初期化
     np.random.seed(random_seed)
     
@@ -27,20 +30,22 @@ def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=No
         burn_in = 100*margin
     
     # 乱数epsilonの作成
-    if randomness=="normal" or randomness:
-        # 正規乱数
+    if randomness=="normal":
+        print("正規乱数")
         random = np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
     elif randomness=="uniform":
-        # 一様乱数
+        print("一様乱数")
         random=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N+burn_in+margin)
     elif randomness=="gamma":
-        # 移動ガンマ乱数
+        print("移動ガンマ乱数")
         # sigmaの値は最大でも4くらい。これ以上大きいと分散がずれる
         random=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N+burn_in+margin)+mu-2/3
     elif randomness=="normal&uniform":
+        print("正規分布＆一様分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N//2)
     elif randomness=="normal&gamma":
+        print("正規分布＆移動ガンマ分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
     else:
@@ -59,7 +64,7 @@ def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=No
             
     return ts[burn_in+margin:]
 
-def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1, N=1000, random_seed=0, burn_in=None, randomness=True):
+def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1, N=1000, random_seed=0, burn_in=None, randomness="normal"):
     """
     randomnessについて、これはinnovation系列の従う分布を指定する。
     正規分布："normal"もしくはTrue
@@ -88,31 +93,34 @@ def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1
     margin = max(p, q, (0 if d==None else d), m*P, m*Q, m*(0 if D==None else D))
     if burn_in==None:
         burn_in = 100*margin
-        
+      
+    # そもそも季節成分あるのか?
+    if m==0:
+        return ARIMA(a=a, b=b, d=d, mu=mu, sigma=sigma, N=N, random_seed=random_seed, burn_in=burn_in, randomness=randomness)
+  
     # 乱数epsilonの作成
-    if randomness=="normal" or randomness:
-        # 正規乱数
+    if randomness=="normal":
+        print("正規乱数")
         random = np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
     elif randomness=="uniform":
-        # 一様乱数
+        print("一様乱数")
         random=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N+burn_in+margin)
     elif randomness=="gamma":
-        # 移動ガンマ乱数
+        print("移動ガンマ乱数")
         # sigmaの値は最大でも4くらい。これ以上大きいと分散がずれる
         random=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N+burn_in+margin)+mu-2/3
     elif randomness=="normal&uniform":
+        print("正規分布＆一様分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N//2)
     elif randomness=="normal&gamma":
+        print("正規分布＆移動ガンマ分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
     else:
         random = np.zeros(shape=(N+burn_in+margin))
 
-    # そもそも季節成分あるのか?
-    if m==0:
-        return ARIMA(a=a, b=b, d=d, mu=mu, sigma=sigma, N=N, random_seed=random_seed, burn_in=burn_in, randomness=randomness)
-    
+   
     # 初期値は0
     ts = np.zeros_like(random)
     u = np.zeros_like(random)
@@ -160,9 +168,9 @@ class Net(nn.Module):
     def __init__(self, p, q, n_unit1, n_unit2):
         super(Net, self).__init__()
         
-        self.fc1 = nn.Linear(p+q+1, n_unit1)
-        self.fc2 = nn.Linear(n_unit1, n_unit2)
-        self.fc3 = nn.Linear(n_unit2,1)
+        self.fc1 = nn.Linear(p+q+1, n_unit1, bias=False)
+        self.fc2 = nn.Linear(n_unit1, n_unit2, bias=False)
+        self.fc3 = nn.Linear(n_unit2, 1, bias=False)
         
     def forward(self,x):
         x = self.fc1(x)
@@ -172,7 +180,7 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
-def NeuralNet(model_random_seed=0, p=7, q=3, n_unit=[16,16], sigma=1, N=1000,random_seed=0, burn_in=None, randomness=True, return_net=False):
+def NeuralNet(model_random_seed=0, p=7, q=3, n_unit=[16,16], mu=0, sigma=1, N=1000,random_seed=0, burn_in=None, randomness="normal", return_net=False):
     # 乱数の初期化
     torch.manual_seed(model_random_seed)
     np.random.seed(random_seed)
@@ -185,21 +193,38 @@ def NeuralNet(model_random_seed=0, p=7, q=3, n_unit=[16,16], sigma=1, N=1000,ran
         burn_in = 100*margin
 
     # 乱数epsilonの作成
-    if randomness:
-        random = np.random.normal(loc=0, scale=sigma, size=N+burn_in+margin)
-        random = torch.tensor(random, dtype=torch.float).view(1,-1)
+    if randomness=="normal":
+        print("正規乱数")
+        random = np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+    elif randomness=="uniform":
+        print("一様乱数")
+        random=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N+burn_in+margin)
+    elif randomness=="gamma":
+        print("移動ガンマ乱数")
+        # sigmaの値は最大でも4くらい。これ以上大きいと分散がずれる
+        random=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N+burn_in+margin)+mu-2/3
+    elif randomness=="normal&uniform":
+        print("正規分布＆一様分布")
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N//2)
+    elif randomness=="normal&gamma":
+        print("正規分布＆移動ガンマ分布")
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
     else:
         random = torch.zeros([1, N+burn_in+margin])
+    random = torch.tensor(random, dtype=torch.float).view(1,-1)
 
     # 初期値は0
     ts = torch.zeros_like(random)
 
     for i in range(margin, N+burn_in+margin):
-        net_input = torch.cat((random[:,i-q:i], ts[:,i-p:i+1]), dim=1)
+        net_input = torch.cat((random[:,i-q:i+1], ts[:,i-p:i]), dim=1)
         output = net(net_input)
         ts[0][i] = float(output)
     
     if not return_net:
+        print("ニューラル")
         return ts[0][burn_in+margin:]
     else:
         return net
