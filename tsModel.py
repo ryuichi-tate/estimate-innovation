@@ -48,6 +48,10 @@ def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=No
         print("正規分布＆移動ガンマ分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
+    elif randomness=="normal&normal":
+        print("正規分布＆分散2倍の正規分布")
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.normal(loc=mu, scale=2*sigma, size=N//2)
     else:
         random = np.zeros(shape=(N+burn_in+margin))
     
@@ -117,6 +121,10 @@ def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1
         print("正規分布＆移動ガンマ分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
+    elif randomness=="normal&normal":
+        print("正規分布＆分散2倍の正規分布")
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.normal(loc=mu, scale=2*sigma, size=N//2)
     else:
         random = np.zeros(shape=(N+burn_in+margin))
 
@@ -211,6 +219,10 @@ def NeuralNet(model_random_seed=0, p=7, q=3, n_unit=[16,16], mu=0, sigma=1, N=10
         print("正規分布＆移動ガンマ分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
+    elif randomness=="normal&normal":
+        print("正規分布＆分散2倍の正規分布")
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.normal(loc=mu, scale=2*sigma, size=N//2)
     else:
         random = torch.zeros([1, N+burn_in+margin])
     random = torch.tensor(random, dtype=torch.float).view(1,-1)
