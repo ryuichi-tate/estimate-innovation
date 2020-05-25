@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=None, randomness="normal"):
+def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=None, randomness="normal", return_innovation=False):
     # 乱数の初期化
     np.random.seed(random_seed)
     
@@ -54,6 +54,8 @@ def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=No
         random[-(N-1)//2:]=np.random.normal(loc=mu, scale=2*sigma, size=N//2)
     else:
         random = np.zeros(shape=(N+burn_in+margin))
+    if return_innovation:
+        return random[-N:]
     
     # 初期値は0
     ts = np.zeros_like(random)
@@ -68,7 +70,7 @@ def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=No
             
     return ts[burn_in+margin:]
 
-def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1, N=1000, random_seed=0, burn_in=None, randomness="normal"):
+def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1, N=1000, random_seed=0, burn_in=None, randomness="normal", return_innovation=False):
     """
     randomnessについて、これはinnovation系列の従う分布を指定する。
     正規分布："normal"もしくはTrue
@@ -100,7 +102,7 @@ def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1
       
     # そもそも季節成分あるのか?
     if m==0:
-        return ARIMA(a=a, b=b, d=d, mu=mu, sigma=sigma, N=N, random_seed=random_seed, burn_in=burn_in, randomness=randomness)
+        return ARIMA(a=a, b=b, d=d, mu=mu, sigma=sigma, N=N, random_seed=random_seed, burn_in=burn_in, randomness=randomness, return_innovation=return_innovation)
   
     # 乱数epsilonの作成
     if randomness=="normal":
@@ -127,6 +129,8 @@ def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1
         random[-(N-1)//2:]=np.random.normal(loc=mu, scale=2*sigma, size=N//2)
     else:
         random = np.zeros(shape=(N+burn_in+margin))
+    if return_innovation:
+        return random[-N:]
 
    
     # 初期値は0
@@ -188,7 +192,7 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
-def NeuralNet(model_random_seed=0, p=7, q=3, n_unit=[16,16], mu=0, sigma=1, N=1000,random_seed=0, burn_in=None, randomness="normal", return_net=False):
+def NeuralNet(model_random_seed=0, p=7, q=3, n_unit=[16,16], mu=0, sigma=1, N=1000,random_seed=0, burn_in=None, randomness="normal", return_net=False, return_innovation=False):
     # 乱数の初期化
     torch.manual_seed(model_random_seed)
     np.random.seed(random_seed)
@@ -226,6 +230,8 @@ def NeuralNet(model_random_seed=0, p=7, q=3, n_unit=[16,16], mu=0, sigma=1, N=10
     else:
         random = torch.zeros([1, N+burn_in+margin])
     random = torch.tensor(random, dtype=torch.float).view(1,-1)
+    if return_innovation:
+        return random[0][-N:]
 
     # 初期値は0
     ts = torch.zeros_like(random)
