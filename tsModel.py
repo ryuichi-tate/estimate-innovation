@@ -31,25 +31,25 @@ def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=No
     
     # 乱数epsilonの作成
     if randomness=="normal":
-        print("正規乱数")
+        # print("正規乱数")
         random = np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
     elif randomness=="uniform":
-        print("一様乱数")
+        # print("一様乱数")
         random=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N+burn_in+margin)
     elif randomness=="gamma":
-        print("移動ガンマ乱数")
+        # print("移動ガンマ乱数")
         # sigmaの値は最大でも4くらい。これ以上大きいと分散がずれる
         random=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N+burn_in+margin)+mu-2/3
     elif randomness=="normal&uniform":
-        print("正規分布＆一様分布")
+        # print("正規分布＆一様分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N//2)
     elif randomness=="normal&gamma":
-        print("正規分布＆移動ガンマ分布")
+        # print("正規分布＆移動ガンマ分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
     elif randomness=="normal&normal":
-        print("正規分布＆分散2倍の正規分布")
+        # print("正規分布＆分散2倍の正規分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.normal(loc=mu, scale=2*sigma, size=N//2)
     else:
@@ -106,25 +106,25 @@ def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1
   
     # 乱数epsilonの作成
     if randomness=="normal":
-        print("正規乱数")
+        # print("正規乱数")
         random = np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
     elif randomness=="uniform":
-        print("一様乱数")
+        # print("一様乱数")
         random=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N+burn_in+margin)
     elif randomness=="gamma":
-        print("移動ガンマ乱数")
+        # print("移動ガンマ乱数")
         # sigmaの値は最大でも4くらい。これ以上大きいと分散がずれる
         random=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N+burn_in+margin)+mu-2/3
     elif randomness=="normal&uniform":
-        print("正規分布＆一様分布")
+        # print("正規分布＆一様分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N//2)
     elif randomness=="normal&gamma":
-        print("正規分布＆移動ガンマ分布")
+        # print("正規分布＆移動ガンマ分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
     elif randomness=="normal&normal":
-        print("正規分布＆分散2倍の正規分布")
+        # print("正規分布＆分散2倍の正規分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.normal(loc=mu, scale=2*sigma, size=N//2)
     else:
@@ -206,25 +206,25 @@ def NeuralNet(model_random_seed=0, p=7, q=3, n_unit=[16,16], mu=0, sigma=1, N=10
 
     # 乱数epsilonの作成
     if randomness=="normal":
-        print("正規乱数")
+        # print("正規乱数")
         random = np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
     elif randomness=="uniform":
-        print("一様乱数")
+        # print("一様乱数")
         random=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N+burn_in+margin)
     elif randomness=="gamma":
-        print("移動ガンマ乱数")
+        # print("移動ガンマ乱数")
         # sigmaの値は最大でも4くらい。これ以上大きいと分散がずれる
         random=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N+burn_in+margin)+mu-2/3
     elif randomness=="normal&uniform":
-        print("正規分布＆一様分布")
+        # print("正規分布＆一様分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N//2)
     elif randomness=="normal&gamma":
-        print("正規分布＆移動ガンマ分布")
+        # print("正規分布＆移動ガンマ分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
     elif randomness=="normal&normal":
-        print("正規分布＆分散2倍の正規分布")
+        # print("正規分布＆分散2倍の正規分布")
         random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
         random[-(N-1)//2:]=np.random.normal(loc=mu, scale=2*sigma, size=N//2)
     else:
