@@ -2,3 +2,4 @@
 
 その前にユールウォーカー法でどのくらい精度良くできるのかを試します
 
+innovation_estimation_distribution.ipynbは湯ールウォーカー法によって学習された推定モデルがinnovationの分布をどこまで正確に当てられているのかを調査しています。
