@@ -131,7 +131,7 @@ for epoch in range(1, opt.n_epochs+1):# epochごとの処理
         # 時系列の順番はそのまま入力した方がいいのかな？
         rand=random.randint(0,trainMatrix.shape[0] - trainMatrix.shape[0]// opt.batch_size*opt.batch_size)
         X = trainMatrix[batch+rand : batch+rand+opt.batch_size]# torch.Size([64, 1, 8])
-    
+
         
         input_tensor = X[:,:,0:p]
         true_tensor = X[:,:,p:p+1].view(opt.batch_size, -1)

@@ -43,15 +43,15 @@ parser.add_argument("--random_seed", type=int, default=0, help="訓練データ�
 parser.add_argument("--batch_size", type=int, default=64, help="batchの大きさ")
 parser.add_argument("--lr", type=float, default=0.00005, help="学習率")
 parser.add_argument("--sample_interval", type=int, default=1000, help="batchを何回学習させる度にgeneratorの出力を保存するか")
-parser.add_argument("--network_bias", type=bool, default=False, help="networkにbiasを入れるかどうか。True/False")
+parser.add_argument("--network_bias", type=bool, default=True, help="networkにbiasを入れるかどうか。True/False")
 parser.add_argument("--data_seed", type=int, default=0, help="Dataの作成に用いる乱数のseed")
 opt = parser.parse_args()
 
-p=7
-
 phi=[0.3, -0.4, 0.2, -0.5, 0.6, -0.1, 0.1]
 
-Data = tsModel.SARIMA(a=phi, N=1400, random_seed=opt.data_seed, sigma=2)
+p=len(phi)
+
+Data = tsModel.SARIMA(a=phi, N=1400, random_seed=opt.data_seed, mu=0, sigma=2)
 Data = torch.tensor(Data, dtype=torch.float)
 Data = torch.tensor(Data)
 plt.figure(figsize=(13,8))
@@ -62,8 +62,8 @@ plt.close()
 
 
 Data=Data.view(1,-1)
-trainData = Data[:,:1000]
-valData = Data[:,1000:1200]
+trainData = Data[:,:900]
+valData = Data[:,900:1000]
 testData = Data[:,1200:]
 
 
@@ -72,8 +72,6 @@ for i in range(trainData.shape[1]-(p+1)):
     ans = trainData[:,i:i+p+1].view(1,Data.shape[0],-1)
     trainMatrix.append(ans)
 trainMatrix = torch.cat(trainMatrix)
-
-
 
 valMatrix = []
 for i in range(valData.shape[1]-(p+1)):
@@ -104,13 +102,15 @@ device = torch.device('cuda:'+gpu_id if cuda else 'cpu')
 # Optimizers(パラメータに対して定義される)
 optimizer = torch.optim.RMSprop(net.parameters(), lr=opt.lr)
 
+Loss = nn.MSELoss()
+
 
 # パラメータと学習データをGPUに乗っける
 net.to(device)
 
 trainMatrix=trainMatrix.to(device)
 valMatrix=valMatrix.to(device)
-
+Loss.to(device)
 
 
 saveModel = input('作成したモデルを保存しますか？ （Yes：1, No：0）  ----> ')
@@ -124,31 +124,26 @@ from scipy.stats import gaussian_kde
 train_loss_curve = []
 val_loss_curve = []
 
+# 訓練データの食わせ方、そのランダムシードを固定する
+random.seed(a=0)
+
 for epoch in range(1, opt.n_epochs+1):# epochごとの処理
-    for i, batch in enumerate(range(0, trainMatrix.shape[0]-opt.batch_size, opt.batch_size)):# batchごとの処理
-        
-        # generatorへの入力を用意する
-        X = trainMatrix[batch:batch+opt.batch_size]# torch.Size([64, 1, 8])
-        # 時系列の順番はそのまま入力した方がいいのかな？
-        rand=random.randint(0,trainMatrix.shape[0] - trainMatrix.shape[0]// opt.batch_size*opt.batch_size)
-        X = trainMatrix[batch+rand : batch+rand+opt.batch_size]# torch.Size([64, 1, 8])
-    
-        
-        input_tensor = X[:,:,0:p]
+    # batchの処理は、0~892をランダムに並び替えたリストbatch_sampleを作成し、ここからbatch×(p+1)の学習データを一つづつ獲得する
+    l=list(range(trainMatrix.shape[0]-opt.batch_size))
+    batch_sample = random.sample(l, len(l))
+    for i, batch in enumerate(batch_sample):
+        X = trainMatrix[batch : batch+opt.batch_size]# torch.Size([64, 1, 8]) (batch, dim, p+1)
+        input_tensor = X[:,:,:-1]
+        # input_tensor = torch.cat([input_tensor, torch.randn([opt.batch_size,1,1]).to(device)], dim=2)
+        input_tensor = torch.cat([torch.randn([opt.batch_size,1,1]).to(device), input_tensor], dim=2)
         true_tensor = X[:,:,p:p+1].view(opt.batch_size, -1)
-        input_tensor = torch.cat([input_tensor, torch.randn([opt.batch_size,1,1]).to(device)], dim=2)
-        input_tensor = Variable(input_tensor)
-        
-        Loss = nn.MSELoss()
         output_tensor = net(input_tensor)
         loss = Loss(output_tensor, true_tensor)
-
         loss.backward()
         optimizer.step()
-    
     train_loss_curve.append(loss.item())
     
-    val_input = torch.cat([valMatrix[:,:,0:p], torch.randn([valMatrix.shape[0],1,1]).to(device)], dim=2)
+    val_input = torch.cat([torch.randn([valMatrix.shape[0],1,1]).to(device), valMatrix[:,:,0:p]], dim=2)
     val_target = valMatrix[:,:,p:p+1].view(valMatrix.shape[0], -1)
     val_loss = Loss(net(val_input), val_target)
     
@@ -160,7 +155,7 @@ for epoch in range(1, opt.n_epochs+1):# epochごとの処理
 
 
 
-    if epoch%opt.sample_interval==0 or epoch==opt.n_epochs:
+    if epoch%100 == 0 or epoch==opt.n_epochs:
         plt.figure(figsize=(13,8))
         plt.title("Lossの遷移　\n　epoch:{0}, batchSize:{2}, network initial Seed:{3}, p:{4}, bias:{5}, data Seed:{6}".format(epoch, opt.n_epochs, opt.batch_size, opt.network_seed, p, opt.network_bias, opt.data_seed))
         plt.xlabel("epoch")
@@ -172,6 +167,7 @@ for epoch in range(1, opt.n_epochs+1):# epochごとの処理
         plt.close()
     
     print("[Epoch %d/%d] [train loss: %f] [validation loss: %f]" % (epoch, opt.n_epochs,loss.item(), val_loss.item()))
+    # print("[Epoch %d/%d] [train loss: %f]" % (epoch, opt.n_epochs,loss.item()))
 
 
 torch.save(net.state_dict(), 'parameters/network_epoch{1}_batchSize{2}_networkSeed{3}_p{4}_networkBias{5}_dataSeed{6}.pth'.format(epoch, opt.n_epochs, opt.batch_size, opt.network_seed, p, opt.network_bias, opt.data_seed))
