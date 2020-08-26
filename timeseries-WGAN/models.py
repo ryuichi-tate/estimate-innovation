@@ -76,7 +76,7 @@ class LinearGenerator(nn.Module):
 
 class predictNet(nn.Module):
     def __init__(self, p=7, q=3, n_unit1=16, n_unit2=32):
-        super(Net, self).__init__()
+        super(predictNet, self).__init__()
         
         self.fc1 = nn.Linear(p+q+1, n_unit1)
         self.fc2 = nn.Linear(n_unit1, n_unit2)
