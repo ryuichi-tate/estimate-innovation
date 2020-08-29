@@ -242,7 +242,6 @@ def NeuralNet(model_random_seed=0, p=7, q=3, n_unit=[16,16], mu=0, sigma=1, N=10
         ts[0][i] = float(output)
     
     if not return_net:
-        print("ニューラル")
         return ts[0][burn_in+margin:]
     else:
         return net
