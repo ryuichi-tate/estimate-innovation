@@ -14,7 +14,10 @@ $F_{\rho}(x)$は累積分布関数
 
 Generatorの出力$\{x_n\}_{n=1}^N$の経験分布と連続確率分布$Q$とのp-Wasserstein距離をゴリゴリ計算すると、
 
-$W_p=\left\{\sum_{n=1}^N\int_{\Phi^{-1}(\frac{n-1}{N})}^{\Phi^{-1}(\frac{n}{N})}|x_n-x|^pf_Q(x)dx\right\}^{\frac{1}{p}}$
+![\begin{align*}
+W_p=\left\{\sum_{n=1}^N\int_{\Phi^{-1}(\frac{n-1}{N})}^{\Phi^{-1}(\frac{n}{N})}|x_n-x|^pf_Q(x)dx\right\}^{\frac{1}{p}}
+\end{align*}
+](https://render.githubusercontent.com/render/math?math=%5Cdisplaystyle+%5Cbegin%7Balign%2A%7D%0AW_p%3D%5Cleft%5C%7B%5Csum_%7Bn%3D1%7D%5EN%5Cint_%7B%5CPhi%5E%7B-1%7D%28%5Cfrac%7Bn-1%7D%7BN%7D%29%7D%5E%7B%5CPhi%5E%7B-1%7D%28%5Cfrac%7Bn%7D%7BN%7D%29%7D%7Cx_n-x%7C%5Epf_Q%28x%29dx%5Cright%5C%7D%5E%7B%5Cfrac%7B1%7D%7Bp%7D%7D%0A%5Cend%7Balign%2A%7D%0A)
 
 $Q$を標準正規分布にしてLossを設計する
 
