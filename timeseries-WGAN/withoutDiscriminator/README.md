@@ -40,7 +40,10 @@ $\frac{1}{\sqrt{2\pi}}\int_a^b|x-c|^pe^{-\frac{x^2}{2}}dx$<br>
 を計算する。<code>a,b,c</code>は<code>torch.tensor()</code>、<code>p</code>は非負の整数。
 
 - <code>pWasserstein(x, p)</code>:<br>
-$W_p=\left\{\sum_{n=1}^N\int_{\Phi^{-1}(\frac{n-1}{N})}^{\Phi^{-1}(\frac{n}{N})}|x_n-x|^p\frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}dx\right\}^{\frac{1}{p}}$<br>
+![\begin{align*}
+W_p=\left\{\sum_{n=1}^N\int_{\Phi^{-1}(\frac{n-1}{N})}^{\Phi^{-1}(\frac{n}{N})}|x_n-x|^p\frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}dx\right\}^{\frac{1}{p}}
+\end{align*}
+](https://render.githubusercontent.com/render/math?math=%5Cdisplaystyle+%5Cbegin%7Balign%2A%7D%0AW_p%3D%5Cleft%5C%7B%5Csum_%7Bn%3D1%7D%5EN%5Cint_%7B%5CPhi%5E%7B-1%7D%28%5Cfrac%7Bn-1%7D%7BN%7D%29%7D%5E%7B%5CPhi%5E%7B-1%7D%28%5Cfrac%7Bn%7D%7BN%7D%29%7D%7Cx_n-x%7C%5Ep%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%7De%5E%7B-%5Cfrac%7Bx%5E2%7D%7B2%7D%7Ddx%5Cright%5C%7D%5E%7B%5Cfrac%7B1%7D%7Bp%7D%7D%0A%5Cend%7Balign%2A%7D%0A)<br>
 を計算する。<code>x</code>は<code>torch.tensor()</code>、<code>p</code>は非負の整数。
 
 ## learn_withoutDiscriminator.ipynb
