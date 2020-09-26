@@ -18,4 +18,21 @@
 ### 非線形でinnovation系列もバラバラに組み合わせたモデルを作成して確かめる。
 
 ## 実験詳細
-`./tmp.ipynb`にて確認しながらつめる。
+`./tmp.ipynb`にて確認しながらつめる。<br>
+→　今回の人工データを生成するモデル$F^{\ast}_{\phi}$は、
+
+$$
+X_t = \sum_{i=1}^4\phi_{ai}X_{t-i} + \varepsilon_t+\sum_{j=1}^2\phi_{bj}X_{t-j}\\
+\phi_a = [1.0, -0.5, 0.7, -0.4],\ \ 
+\phi_b =  [1.0, -0.7], \ \ \varepsilon_t\sim\mathcal{N}(0,1)
+$$
+という、$ARMA(4,2)$を用いる。
+
+ここから作った時系列データの例<br>
+![ARMAモデルのサンプル](./images/ARMA4-2sample.png "ARMA(4,2)の時系列データと元のinnovation系列")
+
+対象実験として、$AR(\hat p)$を仮定してモデリングをした、その残渣系列のMSEをみる 
+
+結果がこれ
+
+![推定対象のARの次数を変化させた時のinnovationのmse](./images/ARMA4-2_inno-MSE_barplot.png "ARMA(4,2)の時系列データと元のinnovation系列")

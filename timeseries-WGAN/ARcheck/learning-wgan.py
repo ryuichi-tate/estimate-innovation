@@ -116,7 +116,6 @@ discriminator = models.Discriminator(q=0, discriminator_hidden_unit=opt.discrimi
 # 人工データの作成
 Data = tsModel.SARIMA(a=[0.3,-0.4,0.3,-0.4,0.3,-0.4,0.3], N=1400, random_seed=opt.data_seed, sigma=2)
 Data = torch.tensor(Data, dtype=torch.float)
-Data = torch.tensor(Data)
 plt.figure(figsize=(13,8))
 plt.plot(Data)
 plt.savefig(path+"/images/AR7モデルの人工データその{0}.png".format(opt.data_seed))

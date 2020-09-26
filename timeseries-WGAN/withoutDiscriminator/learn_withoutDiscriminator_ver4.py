@@ -43,7 +43,7 @@ os.makedirs("output-images", exist_ok=True)
 os.makedirs("parameters", exist_ok=True)
 
 # 真のモデルのパラメータ
-phi_ast=[0.3,-0.4,0.2,-0.5,0.6,-0.1,0.1]
+phi_ast=[1.0, -0.5, 0.7, -0.4]
 p_ast=len(phi_ast)
 mu_ast=0
 sigma_ast=2
@@ -54,7 +54,7 @@ n=100
 data_index = range(n)
 trainDataSets=[]
 for seed in data_index:
-    trainData = tsModel.SARIMA(a=phi_ast, N=trainT, random_seed=seed, mu=mu_ast, sigma=sigma_ast)
+    trainData = tsModel.ARIMA(a=phi_ast, b=[1.0,-0.7], N=trainT, random_seed=seed, mu=mu_ast, sigma=sigma_ast)
     trainDataSets.append(trainData)
 
 # 学習する推定モデルの形状や学習方法なんかを決定します
