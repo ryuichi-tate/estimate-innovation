@@ -34,6 +34,23 @@ class Generator(nn.Module):
             num_features *= s
         return num_features
 
+class FullConnectGenerator(nn.Module):
+    def __init__(self, n_unit1=16, n_unit2=32, p=7, q=3): # ネットワークで使う関数を定義する。
+        super(FullConnectGenerator, self).__init__()
+
+        self.fc1 = nn.Linear(p+1, n_unit1)
+        self.fc2 = nn.Linear(n_unit1, n_unit2)
+        self.fc3 = nn.Linear(n_unit2,q+1)
+            
+    def forward(self, x):# ここでネットワークを構成する。入力はx。
+        x = self.fc1(x)
+        x = F.leaky_relu(x)
+        x = self.fc2(x)
+        x = F.leaky_relu(x)
+        x = self.fc3(x)
+        return x # 出力
+
+
 class Discriminator(nn.Module):
     def __init__(self,q=3,discriminator_hidden_unit=64):
         super(Discriminator, self).__init__()

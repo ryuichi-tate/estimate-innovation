@@ -36,3 +36,6 @@ $$
 結果がこれ
 
 ![推定対象のARの次数を変化させた時のinnovationのmse](./images/ARMA4-2_inno-MSE_barplot.png "ARMA(4,2)の時系列データと元のinnovation系列")
+
+次にwithoutDiscriminatorで学習させた場合にinnovationの評価がどうなるのかを確かめる。
+学習ファイルはlearn_ver1.pyかな。
