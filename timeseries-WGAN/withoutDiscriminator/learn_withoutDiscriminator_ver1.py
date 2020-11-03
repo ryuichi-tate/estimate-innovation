@@ -214,7 +214,7 @@ start=time.time()
 for epoch in range(1, opt.n_epochs+1):# epochごとの処理(discriminatorのepoch)
     
     # epochごとにbatchで計算したlossを平均した値をloss_curveとして描きたい
-#     loss_D_list = []
+    # loss_D_list = []
     loss_G_list = []
     loss_F_list = []
     
@@ -247,7 +247,6 @@ for epoch in range(1, opt.n_epochs+1):# epochごとの処理(discriminatorのepo
 
         generator_done+=1
 
-        
         # -----------------
         #  Train Predictor
         # -----------------

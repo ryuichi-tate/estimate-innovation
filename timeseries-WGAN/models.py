@@ -108,13 +108,14 @@ class predictNet(nn.Module):
         return x
 
 class LinearPredictNet(nn.Module):
-    def __init__(self, p=7, input_dim=1, is_bias=False): # ネットワークで使う関数を定義する。
+    def __init__(self, p=7, is_bias=False): # ネットワークで使う関数を定義する。
         super(LinearPredictNet, self).__init__()
         # 線形変換: y = Wx + b
-        self.fc1 = nn.Linear((p+1)*input_dim, 1,bias=is_bias)
+        self.fc1 = nn.Linear(p, 1,bias=is_bias)
             
     def forward(self, x):# ここでネットワークを構成する。入力はx。
-        x = x.view(-1, self.num_flat_features(x))
+        # x = torch.cat([])
+        x = x.view(x.shape[0],-1) 
         x = self.fc1(x)
         return x # 出力
 
