@@ -10,7 +10,7 @@ class DataSet:
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, drop_last=True)
         """
         self.device = device
-        self.tsData =  torch.tensor(tsData, dtype=torch.float).to(self.device) # torch.tensorに変換
+        self.tsData =  torch.tensor(tsData, dtype=torch.float) # torch.tensorに変換
         self.hat_p = hat_p
         self.X, self.Y = self.make_XY(x=self.tsData, p=self.hat_p)
     

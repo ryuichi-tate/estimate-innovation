@@ -74,22 +74,21 @@ class Discriminator(nn.Module):
         return x
 
 class LinearGenerator(nn.Module):
-    def __init__(self, p=7, input_dim=1, is_bias=False): # ネットワークで使う関数を定義する。
+    def __init__(self, input_size=7, is_bias=False): # ネットワークで使う関数を定義する。
         super(LinearGenerator, self).__init__()
         # 線形変換: y = Wx + b
-        self.fc1 = nn.Linear((p+1)*input_dim, 1,bias=is_bias)
+        self.fc1 = nn.Linear(in_features=input_size, out_features=1, bias=is_bias)
             
     def forward(self, x):# ここでネットワークを構成する。入力はx。
-        x = x.view(-1, self.num_flat_features(x))
         x = self.fc1(x)
         return x # 出力
 
-    def num_flat_features(self, x):
-        size = x.size()[1:]  # all dimensions except the batch dimension
-        num_features = 1
-        for s in size:
-            num_features *= s
-        return num_features
+    # def num_flat_features(self, x):
+    #     size = x.size()[1:]  # all dimensions except the batch dimension
+    #     num_features = 1
+    #     for s in size:
+    #         num_features *= s
+    #     return num_features
 
 class predictNet(nn.Module):
     def __init__(self, p=7, q=3, n_unit1=16, n_unit2=32):
