@@ -5,4 +5,9 @@ statsmodelの最小二乗法により推定したパラメータと損失を二�
 NNでの学習がうまくいかないのはなぜか
 
 サイキッドラーンで回帰してみる.
-→完全一致
+→statsmodelsと完全一致
+
+batchサイズを1にしたらできた
+
+innovationを推定させると精度が上がるのか？
+- evaluate_accuracy_of_X.ipynbで実験する

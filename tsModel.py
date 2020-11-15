@@ -67,7 +67,7 @@ def ARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=No
         for _ in range(d):
             for i in range(margin, N+burn_in+margin):
                 ts[i] = ts[i] + ts[i-1]
-            
+
     return ts[burn_in+margin:]
 
 def SARIMA(a=[0], b=[0], d =None, phi=[0], theta=[0], D=None, m=0, mu=0, sigma=1, N=1000, random_seed=0, burn_in=None, randomness="normal", return_innovation=False):
@@ -245,3 +245,71 @@ def NeuralNet(model_random_seed=0, p=7, q=3, n_unit=[16,16], mu=0, sigma=1, N=10
         return ts[0][burn_in+margin:]
     else:
         return net
+
+def tanh(x, c=2):
+    return  (1 - np.exp(-c*x)) / (1 + np.exp(-c*x))
+
+def nonLinearARIMA(a=[0], b=[0], d =None, mu=0, sigma=1,N=1000, random_seed=0, burn_in=None, randomness="normal", return_innovation=False, c=2):
+    # 乱数の初期化
+    np.random.seed(random_seed)
+    
+    # 係数をnumpy.ndarrayに変えておく
+    a = np.array(a)
+    b = np.array(b)
+    
+    # 次数の取得
+    p =  0 if (a == np.array([0])).prod() else len(a)
+    q =  0 if (b == np.array([0])).prod() else len(b)
+    
+    # ARMAかARIMAか判定
+    if d==None:
+        ARIMA_flg=False
+        d=0
+    else:
+        ARIMA_flg=True
+    
+    # burn-in期間の設定
+    margin = max(p, q, d)
+    if burn_in==None:
+        burn_in = 100*margin
+    
+    # 乱数epsilonの作成
+    if randomness=="normal":
+        # print("正規乱数")
+        random = np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+    elif randomness=="uniform":
+        # print("一様乱数")
+        random=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N+burn_in+margin)
+    elif randomness=="gamma":
+        # print("移動ガンマ乱数")
+        # sigmaの値は最大でも4くらい。これ以上大きいと分散がずれる
+        random=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N+burn_in+margin)+mu-2/3
+    elif randomness=="normal&uniform":
+        # print("正規分布＆一様分布")
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.uniform(low=mu-np.sqrt(3)*sigma, high=mu+np.sqrt(3)*sigma, size=N//2)
+    elif randomness=="normal&gamma":
+        # print("正規分布＆移動ガンマ分布")
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.gamma(shape=4/(9*sigma**2), scale=3/2*sigma**2, size=N//2)+mu-2/3
+    elif randomness=="normal&normal":
+        # print("正規分布＆分散2倍の正規分布")
+        random=np.random.normal(loc=mu, scale=sigma, size=N+burn_in+margin)
+        random[-(N-1)//2:]=np.random.normal(loc=mu, scale=2*sigma, size=N//2)
+    else:
+        random = np.zeros(shape=(N+burn_in+margin))
+    if return_innovation:
+        return random[-N:]
+    
+    # 初期値は0
+    ts = np.zeros_like(random)
+    
+    for i in range(margin, N+burn_in+margin):
+        ts[i] = tanh( (a*np.flip(ts[i-p:i])).sum() + (b*np.flip(random[i-q:i])).sum() + random[i], c=c )
+    
+    if ARIMA_flg:
+        for _ in range(d):
+            for i in range(margin, N+burn_in+margin):
+                ts[i] = tanh( ts[i] + ts[i-1], c=c )
+            
+    return ts[burn_in+margin:]
