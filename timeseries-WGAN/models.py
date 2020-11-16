@@ -35,12 +35,12 @@ class Generator(nn.Module):
         return num_features
 
 class FullConnectGenerator(nn.Module):
-    def __init__(self, n_unit1=16, n_unit2=32, p=7, q=3): # ネットワークで使う関数を定義する。
+    def __init__(self, n_unit1=16, n_unit2=32, input_size=7, output_size=3): # ネットワークで使う関数を定義する。
         super(FullConnectGenerator, self).__init__()
 
-        self.fc1 = nn.Linear(p+1, n_unit1)
+        self.fc1 = nn.Linear(input_size, n_unit1)
         self.fc2 = nn.Linear(n_unit1, n_unit2)
-        self.fc3 = nn.Linear(n_unit2,q+1)
+        self.fc3 = nn.Linear(n_unit2,output_size)
             
     def forward(self, x):# ここでネットワークを構成する。入力はx。
         x = self.fc1(x)
@@ -111,7 +111,7 @@ class LinearPredictNet(nn.Module):
         super(LinearPredictNet, self).__init__()
         # 線形変換: y = Wx + b
         self.fc1 = nn.Linear(input_size, 1, bias=is_bias)
-            
+
     def forward(self, x):# ここでネットワークを構成する。入力はx。
         # x = x.view(x.shape[0],-1) 
         x = self.fc1(x)
@@ -123,3 +123,15 @@ class LinearPredictNet(nn.Module):
     #     for s in size:
     #         num_features *= s
     #     return num_features
+
+class semiLinearPredictNet(nn.Module):
+    def __init__(self, input_size, is_bias=False):
+        super(semiLinearPredictNet, self).__init__()
+        self.fc1 = nn.Linear(in_features=input_size, out_features=1, bias=is_bias)
+        self.scale = nn.Parameter(torch.tensor([1.0]))
+        self.tanh = nn.Tanh()
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.tanh(self.scale*x)
+        return x
